@@ -1,0 +1,34 @@
+{
+  "Comment": "Verify S3 file existence and content",
+  "StartAt": "CheckFileExists",
+  "States": {
+    "CheckFileExists": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:ap-south-1:309336842568:function:checks3fileexistlambda",
+      "ResultPath": "$.checkResult",
+      "Next": "FileExists?"
+    },
+    "FileExists?": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.checkResult.status",
+          "StringEquals": "exists",
+          "Next": "ValidateFile"
+        }
+      ],
+      "Default": "FileNotFound"
+    },
+    "ValidateFile": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:ap-south-1:309336842568:function:columnvalidationlambda",
+      "ResultPath": "$.validationResult",
+      "End": true
+    },
+    "FileNotFound": {
+      "Type": "Fail",
+      "Error": "FileNotFound",
+      "Cause": "The specified file does not exist in the bucket."
+    }
+  }
+}

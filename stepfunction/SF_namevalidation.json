@@ -1,0 +1,45 @@
+{
+  "Comment": "User validation with name match check",
+  "StartAt": "Lambda Invoke",
+  "States": {
+    "Lambda Invoke": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-south-1:309336842568:function:required_fields_verification_lmb",
+        "Payload.$": "$"
+      },
+      "ResultSelector": {
+        "name.$": "$.Payload.name"
+      },
+      "ResultPath": "$.userData",
+      "Next": "Choice"
+    },
+    "Choice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Next": "Success",
+          "Or": [
+            {
+              "Variable": "$.name",
+              "StringMatches": "vimal"
+            },
+            {
+              "Variable": "$.name",
+              "StringMatches": "ram"
+            }
+          ]
+        }
+      ],
+      "Default": "Fail"
+    },
+    "Success": {
+      "Type": "Succeed"
+    },
+    "Fail": {
+      "Type": "Fail",
+      "Error": "This is not the person we are lookign for"
+    }
+  }
+}
